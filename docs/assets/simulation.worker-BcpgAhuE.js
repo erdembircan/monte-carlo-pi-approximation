@@ -1,0 +1,1 @@
+(function(){"use strict";self.onmessage=function(i){const{sampleSize:o}=i.data,t=new Float32Array(o*2);let a=0;for(let s=0;s<o;s++){const n=Math.random(),e=Math.random();t[s*2]=n,t[s*2+1]=e,n*n+e*e<=1&&a++}self.postMessage({points:t,insideCount:a},[t.buffer])}})();

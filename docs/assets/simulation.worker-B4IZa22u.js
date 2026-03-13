@@ -1,1 +1,0 @@
-(function(){self.onmessage=function(e){let{sampleSize:t}=e.data,n=new Float32Array(t*2),r=0;for(let e=0;e<t;e++){let t=Math.random(),i=Math.random();n[e*2]=t,n[e*2+1]=i,t*t+i*i<=1&&r++}self.postMessage({points:n,insideCount:r},[n.buffer])}})();
