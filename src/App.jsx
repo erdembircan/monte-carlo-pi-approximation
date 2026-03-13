@@ -126,11 +126,16 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <div className="max-w-3xl mx-auto px-4 py-8 flex flex-col items-center gap-6">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Monte Carlo π Approximation
-        </h1>
+    <div className="min-h-screen bg-[#fafafa] text-[rgba(0,0,0,0.8)]">
+      <div className="max-w-3xl mx-auto px-6 py-16 flex flex-col items-center gap-10">
+        <header className="text-center space-y-2">
+          <h1 className="text-4xl font-semibold tracking-tight text-[rgba(0,0,0,0.9)]">
+            Monte Carlo π Approximation
+          </h1>
+          <p className="text-sm text-[rgba(0,0,0,0.5)]">
+            Estimating π by sampling random points in a unit square
+          </p>
+        </header>
 
         <Controls
           mode={mode}
@@ -150,12 +155,18 @@ export default function App() {
           isComputing={isComputing}
         />
 
-        <FormulaDisplay insideCount={insideCount} totalCount={points.length} />
+        <div className="w-full max-w-md flex flex-col items-center gap-6">
+          <FormulaDisplay insideCount={insideCount} totalCount={points.length} />
 
-        <Stats
-          insideCount={insideCount}
-          outsideCount={points.length - insideCount}
-        />
+          <Stats
+            insideCount={insideCount}
+            outsideCount={points.length - insideCount}
+          />
+        </div>
+
+        <footer className="text-xs text-[rgba(0,0,0,0.3)] pt-4">
+          &copy; 2026 Erdem Bircan
+        </footer>
       </div>
     </div>
   );
