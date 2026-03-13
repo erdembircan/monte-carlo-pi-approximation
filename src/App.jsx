@@ -15,6 +15,7 @@ export default function App() {
   const [pixelBuffer, setPixelBuffer] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isComputing, setIsComputing] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [showInfo, setShowInfo] = useState(() => {
     return !document.cookie.includes('info_seen=1');
   });
@@ -39,16 +40,32 @@ export default function App() {
     setPixelBuffer(null);
     setIsRunning(false);
     setIsComputing(false);
+    setProgress(0);
     pointsRef.current = [];
     insideRef.current = 0;
   }, []);
 
   const startRealtime = useCallback(() => {
-    setIsRunning(true);
-    pointsRef.current = [];
-    insideRef.current = 0;
-
     const batchSize = speed === 'fast' ? 100 : 10;
+
+    // Generate first batch synchronously for instant visual feedback
+    const firstPoints = [];
+    let firstInside = 0;
+    for (let i = 0; i < batchSize; i++) {
+      const x = Math.random();
+      const y = Math.random();
+      const inside = x * x + y * y <= 1;
+      if (inside) firstInside++;
+      firstPoints.push({ x, y, inside });
+    }
+
+    pointsRef.current = firstPoints;
+    insideRef.current = firstInside;
+
+    setIsRunning(true);
+    setPoints([...firstPoints]);
+    setInsideCount(firstInside);
+    setTotalCount(firstPoints.length);
 
     const step = () => {
       const currentLen = pointsRef.current.length;
@@ -94,14 +111,20 @@ export default function App() {
     workerRef.current = worker;
 
     worker.onmessage = (e) => {
-      const { pixels, insideCount: count, totalCount: total } = e.data;
-      setPixelBuffer(pixels);
-      setInsideCount(count);
-      setTotalCount(total);
-      setIsComputing(false);
-      setIsRunning(false);
-      worker.terminate();
-      workerRef.current = null;
+      const { type } = e.data;
+      if (type === 'progress') {
+        setProgress(e.data.progress);
+      } else {
+        const { pixels, insideCount: count, totalCount: total } = e.data;
+        setPixelBuffer(pixels);
+        setInsideCount(count);
+        setTotalCount(total);
+        setProgress(1);
+        setIsComputing(false);
+        setIsRunning(false);
+        worker.terminate();
+        workerRef.current = null;
+      }
     };
 
     worker.postMessage({ sampleSize });
@@ -109,13 +132,11 @@ export default function App() {
 
   const handleStart = useCallback(() => {
     handleReset();
-    setTimeout(() => {
-      if (mode === 'realtime') {
-        startRealtime();
-      } else {
-        startNonRealtime();
-      }
-    }, 0);
+    if (mode === 'realtime') {
+      startRealtime();
+    } else {
+      startNonRealtime();
+    }
   }, [mode, handleReset, startRealtime, startNonRealtime]);
 
   // Cleanup on unmount
@@ -168,6 +189,7 @@ export default function App() {
           insideCount={insideCount}
           pixelBuffer={pixelBuffer}
           isComputing={isComputing}
+          progress={progress}
         />
 
         <div className="w-full max-w-md flex flex-col items-center gap-6">

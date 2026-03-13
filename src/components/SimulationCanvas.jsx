@@ -63,7 +63,7 @@ function drawStaticElements(ctx) {
   ctx.stroke();
 }
 
-export default function SimulationCanvas({ points, insideCount, pixelBuffer, isComputing }) {
+export default function SimulationCanvas({ points, insideCount, pixelBuffer, isComputing, progress }) {
   const canvasRef = useRef(null);
   const bufferRef = useRef(null);
   const drawnCountRef = useRef(0);
@@ -76,16 +76,6 @@ export default function SimulationCanvas({ points, insideCount, pixelBuffer, isC
     bufferRef.current = buffer;
     drawnCountRef.current = 0;
   }, []);
-
-  // Reset buffer when points are cleared and no pixel buffer
-  const pointCount = points.length;
-  useEffect(() => {
-    if (pointCount === 0 && !pixelBuffer && bufferRef.current) {
-      const ctx = bufferRef.current.getContext('2d');
-      ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-      drawnCountRef.current = 0;
-    }
-  }, [pointCount, pixelBuffer]);
 
   // Render pixel buffer from worker (non-realtime)
   useEffect(() => {
@@ -119,6 +109,13 @@ export default function SimulationCanvas({ points, insideCount, pixelBuffer, isC
     if (!canvas || !buffer) return;
 
     const bufCtx = buffer.getContext('2d');
+
+    // Detect reset: if points decreased, clear the buffer
+    if (points.length < drawnCountRef.current) {
+      bufCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+      drawnCountRef.current = 0;
+    }
+
     drawRealtimeDots(bufCtx, points, drawnCountRef.current);
     drawnCountRef.current = points.length;
 
@@ -144,9 +141,16 @@ export default function SimulationCanvas({ points, insideCount, pixelBuffer, isC
       />
       {isComputing && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/85 rounded-2xl">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-4 border-sky-400 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm text-[rgba(0,0,0,0.5)]">Computing...</span>
+          <div className="flex flex-col items-center gap-3 w-48">
+            <div className="w-full h-1.5 bg-black/5 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-sky-500 rounded-full transition-all duration-200"
+                style={{ width: `${Math.round(progress * 100)}%` }}
+              />
+            </div>
+            <span className="text-sm text-[rgba(0,0,0,0.5)]">
+              {Math.round(progress * 100)}%
+            </span>
           </div>
         </div>
       )}

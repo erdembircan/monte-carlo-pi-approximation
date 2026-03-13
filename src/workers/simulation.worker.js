@@ -8,9 +8,10 @@ const OUTSIDE_R = 219, OUTSIDE_G = 39, OUTSIDE_B = 119;
 self.onmessage = function (e) {
   const { sampleSize } = e.data;
 
-  // Render directly into a pixel buffer
   const pixels = new Uint8ClampedArray(CANVAS_SIZE * CANVAS_SIZE * 4);
   let insideCount = 0;
+
+  const progressInterval = Math.max(1, Math.floor(sampleSize / 100));
 
   for (let i = 0; i < sampleSize; i++) {
     const x = Math.random();
@@ -24,7 +25,6 @@ self.onmessage = function (e) {
     const g = inside ? INSIDE_G : OUTSIDE_G;
     const b = inside ? INSIDE_B : OUTSIDE_B;
 
-    // 2x2 pixel dot
     for (let dy = 0; dy < 2; dy++) {
       for (let dx = 0; dx < 2; dx++) {
         const xi = px + dx;
@@ -38,10 +38,14 @@ self.onmessage = function (e) {
         }
       }
     }
+
+    if (i % progressInterval === 0) {
+      self.postMessage({ type: 'progress', progress: i / sampleSize });
+    }
   }
 
   self.postMessage(
-    { pixels, insideCount, totalCount: sampleSize },
+    { type: 'done', pixels, insideCount, totalCount: sampleSize },
     [pixels.buffer]
   );
 };
