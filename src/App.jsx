@@ -139,7 +139,7 @@ export default function App() {
             </h1>
             <button
               onClick={() => setShowInfo(true)}
-              className="w-6 h-6 flex items-center justify-center rounded-full outline outline-1 outline-black/25 text-[rgba(0,0,0,0.5)] hover:text-[rgba(0,0,0,0.8)] hover:outline-black/40 transition-colors text-xs font-medium"
+              className="w-6 h-6 flex items-center justify-center rounded-full outline outline-1 outline-black/25 text-[rgba(0,0,0,0.5)] hover:text-[rgba(0,0,0,0.8)] hover:outline-black/40 transition-colors text-xs font-medium cursor-pointer"
             >
               i
             </button>

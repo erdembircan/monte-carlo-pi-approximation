@@ -16,7 +16,7 @@ export default function Controls({
         <label className="text-xs font-medium uppercase tracking-wide text-[rgba(0,0,0,0.4)]">Mode</label>
         <div className="flex rounded-full overflow-hidden outline outline-1 outline-black/10">
           <button
-            className={`px-3.5 py-1.5 text-sm transition-colors ${
+            className={`px-3.5 py-1.5 text-sm transition-colors cursor-pointer ${
               mode === 'realtime'
                 ? 'bg-[rgba(0,0,0,0.85)] text-white'
                 : 'bg-white text-[rgba(0,0,0,0.6)] hover:bg-[rgba(0,0,0,0.04)]'
@@ -27,7 +27,7 @@ export default function Controls({
             Realtime
           </button>
           <button
-            className={`px-3.5 py-1.5 text-sm transition-colors ${
+            className={`px-3.5 py-1.5 text-sm transition-colors cursor-pointer ${
               mode === 'non-realtime'
                 ? 'bg-[rgba(0,0,0,0.85)] text-white'
                 : 'bg-white text-[rgba(0,0,0,0.6)] hover:bg-[rgba(0,0,0,0.04)]'
@@ -61,7 +61,7 @@ export default function Controls({
           <label className="text-xs font-medium uppercase tracking-wide text-[rgba(0,0,0,0.4)]">Speed</label>
           <div className="flex rounded-full overflow-hidden outline outline-1 outline-black/10">
             <button
-              className={`px-3.5 py-1.5 text-sm transition-colors ${
+              className={`px-3.5 py-1.5 text-sm transition-colors cursor-pointer ${
                 speed === 'normal'
                   ? 'bg-[rgba(0,0,0,0.85)] text-white'
                   : 'bg-white text-[rgba(0,0,0,0.6)] hover:bg-[rgba(0,0,0,0.04)]'
@@ -72,7 +72,7 @@ export default function Controls({
               Normal
             </button>
             <button
-              className={`px-3.5 py-1.5 text-sm transition-colors ${
+              className={`px-3.5 py-1.5 text-sm transition-colors cursor-pointer ${
                 speed === 'fast'
                   ? 'bg-[rgba(0,0,0,0.85)] text-white'
                   : 'bg-white text-[rgba(0,0,0,0.6)] hover:bg-[rgba(0,0,0,0.04)]'
@@ -91,13 +91,13 @@ export default function Controls({
         <button
           onClick={onStart}
           disabled={isRunning}
-          className="px-5 py-1.5 bg-[rgba(0,0,0,0.85)] hover:bg-[rgba(0,0,0,0.75)] disabled:opacity-40 text-white text-sm font-medium rounded-full transition-colors"
+          className="px-5 py-1.5 bg-[rgba(0,0,0,0.85)] hover:bg-[rgba(0,0,0,0.75)] disabled:opacity-40 text-white text-sm font-medium rounded-full transition-colors cursor-pointer"
         >
           Start
         </button>
         <button
           onClick={onReset}
-          className="px-5 py-1.5 bg-white hover:bg-[rgba(0,0,0,0.04)] text-[rgba(0,0,0,0.6)] text-sm font-medium rounded-full outline outline-1 outline-black/10 transition-colors"
+          className="px-5 py-1.5 bg-white hover:bg-[rgba(0,0,0,0.04)] text-[rgba(0,0,0,0.6)] text-sm font-medium rounded-full outline outline-1 outline-black/10 transition-colors cursor-pointer"
         >
           Reset
         </button>
