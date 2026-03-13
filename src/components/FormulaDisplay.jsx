@@ -18,7 +18,7 @@ export default function FormulaDisplay({ insideCount, totalCount }) {
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className="font-mono text-4xl font-semibold tracking-tight">
+      <span className="font-mono text-4xl font-semibold tracking-tight tabular-nums">
         {totalCount > 0 ? (
           <>
             <span className="bg-emerald-100 text-emerald-700 px-0.5">

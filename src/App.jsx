@@ -149,7 +149,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-[rgba(0,0,0,0.8)]">
-      <div className="max-w-3xl mx-auto px-6 py-16 flex flex-col items-center gap-10">
+      <div className="max-w-5xl mx-auto px-6 py-10 flex flex-col items-center gap-8">
         <header className="text-center space-y-2 relative">
           <div className="flex items-center justify-center gap-3">
             <h1 className="text-4xl font-semibold tracking-tight text-[rgba(0,0,0,0.9)]">
@@ -184,21 +184,25 @@ export default function App() {
           onReset={handleReset}
         />
 
-        <SimulationCanvas
-          points={points}
-          insideCount={insideCount}
-          pixelBuffer={pixelBuffer}
-          isComputing={isComputing}
-          progress={progress}
-        />
+        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+          <div className="shrink-0">
+            <SimulationCanvas
+              points={points}
+              insideCount={insideCount}
+              pixelBuffer={pixelBuffer}
+              isComputing={isComputing}
+              progress={progress}
+            />
+          </div>
 
-        <div className="w-full max-w-md flex flex-col items-center gap-6">
-          <FormulaDisplay insideCount={insideCount} totalCount={totalCount || points.length} />
+          <div className="flex flex-col items-center lg:items-start gap-6 lg:py-6 lg:min-w-56">
+            <FormulaDisplay insideCount={insideCount} totalCount={totalCount || points.length} />
 
-          <Stats
-            insideCount={insideCount}
-            outsideCount={(totalCount || points.length) - insideCount}
-          />
+            <Stats
+              insideCount={insideCount}
+              outsideCount={(totalCount || points.length) - insideCount}
+            />
+          </div>
         </div>
 
         <footer className="text-xs text-[rgba(0,0,0,0.3)] pt-4">
