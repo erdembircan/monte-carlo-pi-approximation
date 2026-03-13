@@ -1,0 +1,24 @@
+name: Build and Commit
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: "[CHORE]: rebuild production assets"
