@@ -144,7 +144,7 @@ export default function SimulationCanvas({ points, insideCount, pixelBuffer, isC
           <div className="flex flex-col items-center gap-3 w-48">
             <div className="w-full h-1.5 bg-black/5 rounded-full overflow-hidden">
               <div
-                className="h-full bg-sky-500 rounded-full transition-all duration-200"
+                className="h-full bg-sky-500 rounded-full"
                 style={{ width: `${Math.round(progress * 100)}%` }}
               />
             </div>
