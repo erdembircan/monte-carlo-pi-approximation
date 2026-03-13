@@ -1,5 +1,7 @@
 # Monte Carlo Pi Approximation
 
+[Live Demo](https://erdembircan.github.io/monte-carlo-pi-approximation/)
+
 An interactive visualization of the Monte Carlo method for estimating the value of pi.
 
 Random points are scattered uniformly across a unit square. A quarter circle of radius 1 is inscribed in the square. The ratio of points landing inside the quarter circle to the total number of points approximates pi/4, giving us:
