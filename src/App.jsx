@@ -3,6 +3,7 @@ import SimulationCanvas from './components/SimulationCanvas';
 import Controls from './components/Controls';
 import FormulaDisplay from './components/FormulaDisplay';
 import Stats from './components/Stats';
+import InfoPanel from './components/InfoPanel';
 
 export default function App() {
   const [mode, setMode] = useState('realtime');
@@ -12,6 +13,9 @@ export default function App() {
   const [insideCount, setInsideCount] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isComputing, setIsComputing] = useState(false);
+  const [showInfo, setShowInfo] = useState(() => {
+    return !document.cookie.includes('info_seen=1');
+  });
 
   const rafRef = useRef(null);
   const workerRef = useRef(null);
@@ -128,14 +132,27 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#fafafa] text-[rgba(0,0,0,0.8)]">
       <div className="max-w-3xl mx-auto px-6 py-16 flex flex-col items-center gap-10">
-        <header className="text-center space-y-2">
-          <h1 className="text-4xl font-semibold tracking-tight text-[rgba(0,0,0,0.9)]">
-            Monte Carlo π Approximation
-          </h1>
+        <header className="text-center space-y-2 relative">
+          <div className="flex items-center justify-center gap-3">
+            <h1 className="text-4xl font-semibold tracking-tight text-[rgba(0,0,0,0.9)]">
+              Monte Carlo π Approximation
+            </h1>
+            <button
+              onClick={() => setShowInfo(true)}
+              className="w-6 h-6 flex items-center justify-center rounded-full outline outline-1 outline-black/25 text-[rgba(0,0,0,0.5)] hover:text-[rgba(0,0,0,0.8)] hover:outline-black/40 transition-colors text-xs font-medium"
+            >
+              i
+            </button>
+          </div>
           <p className="text-sm text-[rgba(0,0,0,0.5)]">
             Estimating π by sampling random points in a unit square
           </p>
         </header>
+
+        <InfoPanel isOpen={showInfo} onClose={() => {
+          setShowInfo(false);
+          document.cookie = 'info_seen=1; max-age=31536000; path=/';
+        }} />
 
         <Controls
           mode={mode}
