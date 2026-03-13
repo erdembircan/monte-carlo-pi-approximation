@@ -11,6 +11,8 @@ export default function App() {
   const [sampleSize, setSampleSize] = useState(10000);
   const [points, setPoints] = useState([]);
   const [insideCount, setInsideCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [pixelBuffer, setPixelBuffer] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isComputing, setIsComputing] = useState(false);
   const [showInfo, setShowInfo] = useState(() => {
@@ -33,6 +35,8 @@ export default function App() {
     }
     setPoints([]);
     setInsideCount(0);
+    setTotalCount(0);
+    setPixelBuffer(null);
     setIsRunning(false);
     setIsComputing(false);
     pointsRef.current = [];
@@ -71,6 +75,7 @@ export default function App() {
 
       setPoints([...pointsRef.current]);
       setInsideCount(insideRef.current);
+      setTotalCount(pointsRef.current.length);
 
       rafRef.current = requestAnimationFrame(step);
     };
@@ -89,18 +94,10 @@ export default function App() {
     workerRef.current = worker;
 
     worker.onmessage = (e) => {
-      const { points: rawPoints, insideCount: count } = e.data;
-      const parsed = [];
-      for (let i = 0; i < rawPoints.length; i += 2) {
-        const x = rawPoints[i];
-        const y = rawPoints[i + 1];
-        parsed.push({ x, y, inside: x * x + y * y <= 1 });
-      }
-
-      pointsRef.current = parsed;
-      insideRef.current = count;
-      setPoints(parsed);
+      const { pixels, insideCount: count, totalCount: total } = e.data;
+      setPixelBuffer(pixels);
       setInsideCount(count);
+      setTotalCount(total);
       setIsComputing(false);
       setIsRunning(false);
       worker.terminate();
@@ -169,15 +166,16 @@ export default function App() {
         <SimulationCanvas
           points={points}
           insideCount={insideCount}
+          pixelBuffer={pixelBuffer}
           isComputing={isComputing}
         />
 
         <div className="w-full max-w-md flex flex-col items-center gap-6">
-          <FormulaDisplay insideCount={insideCount} totalCount={points.length} />
+          <FormulaDisplay insideCount={insideCount} totalCount={totalCount || points.length} />
 
           <Stats
             insideCount={insideCount}
-            outsideCount={points.length - insideCount}
+            outsideCount={(totalCount || points.length) - insideCount}
           />
         </div>
 

@@ -4,7 +4,66 @@ const CANVAS_SIZE = 500;
 const PADDING = 40;
 const PLOT_SIZE = CANVAS_SIZE - PADDING * 2;
 
-export default function SimulationCanvas({ points, insideCount, isComputing }) {
+function drawRealtimeDots(bufCtx, points, startIdx) {
+  if (startIdx >= points.length) return;
+
+  for (let i = startIdx; i < points.length; i++) {
+    const { x, y, inside } = points[i];
+    const px = PADDING + x * PLOT_SIZE;
+    const py = PADDING + (1 - y) * PLOT_SIZE;
+
+    bufCtx.fillStyle = inside
+      ? 'rgba(2, 132, 199, 0.85)'
+      : 'rgba(219, 39, 119, 0.7)';
+    bufCtx.fillRect(px - 1, py - 1, 2, 2);
+  }
+}
+
+function drawStaticElements(ctx) {
+  ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const pos = PADDING + (i / 4) * PLOT_SIZE;
+    ctx.beginPath();
+    ctx.moveTo(pos, PADDING);
+    ctx.lineTo(pos, PADDING + PLOT_SIZE);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(PADDING, pos);
+    ctx.lineTo(PADDING + PLOT_SIZE, pos);
+    ctx.stroke();
+  }
+
+  // Axis labels
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+  ctx.font = '11px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  for (let i = 0; i <= 4; i++) {
+    const val = (i / 4).toFixed(2);
+    const pos = PADDING + (i / 4) * PLOT_SIZE;
+    ctx.fillText(val, pos, CANVAS_SIZE - 14);
+    ctx.save();
+    ctx.textAlign = 'right';
+    ctx.fillText((1 - i / 4).toFixed(2), PADDING - 8, pos + 4);
+    ctx.restore();
+  }
+
+  // Quarter circle arc
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(PADDING, PADDING + PLOT_SIZE, PLOT_SIZE, -Math.PI / 2, 0);
+  ctx.stroke();
+}
+
+export default function SimulationCanvas({ points, insideCount, pixelBuffer, isComputing }) {
   const canvasRef = useRef(null);
   const bufferRef = useRef(null);
   const drawnCountRef = useRef(0);
@@ -18,87 +77,53 @@ export default function SimulationCanvas({ points, insideCount, isComputing }) {
     drawnCountRef.current = 0;
   }, []);
 
-  // Reset buffer when points are cleared
+  // Reset buffer when points are cleared and no pixel buffer
   const pointCount = points.length;
   useEffect(() => {
-    if (pointCount === 0 && bufferRef.current) {
+    if (pointCount === 0 && !pixelBuffer && bufferRef.current) {
       const ctx = bufferRef.current.getContext('2d');
       ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
       drawnCountRef.current = 0;
     }
-  }, [pointCount]);
+  }, [pointCount, pixelBuffer]);
 
-  // Draw new points incrementally onto buffer, then composite
+  // Render pixel buffer from worker (non-realtime)
   useEffect(() => {
+    if (!pixelBuffer) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    drawStaticElements(ctx);
+
+    // Draw the pre-rendered pixel buffer via a temp canvas
+    const tmp = document.createElement('canvas');
+    tmp.width = CANVAS_SIZE;
+    tmp.height = CANVAS_SIZE;
+    const tmpCtx = tmp.getContext('2d');
+    const imageData = new ImageData(new Uint8ClampedArray(pixelBuffer), CANVAS_SIZE, CANVAS_SIZE);
+    tmpCtx.putImageData(imageData, 0, 0);
+    ctx.drawImage(tmp, 0, 0);
+
+    // Border around plot area
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(PADDING, PADDING, PLOT_SIZE, PLOT_SIZE);
+  }, [pixelBuffer]);
+
+  // Draw realtime points incrementally onto buffer, then composite
+  useEffect(() => {
+    if (pixelBuffer) return;
     const canvas = canvasRef.current;
     const buffer = bufferRef.current;
     if (!canvas || !buffer) return;
 
     const bufCtx = buffer.getContext('2d');
-    const startIdx = drawnCountRef.current;
-
-    // Draw only new points onto the buffer
-    for (let i = startIdx; i < points.length; i++) {
-      const { x, y, inside } = points[i];
-      const px = PADDING + x * PLOT_SIZE;
-      const py = PADDING + (1 - y) * PLOT_SIZE;
-
-      bufCtx.fillStyle = inside
-        ? 'rgba(2, 132, 199, 0.85)'
-        : 'rgba(219, 39, 119, 0.7)';
-      bufCtx.beginPath();
-      bufCtx.arc(px, py, 1.5, 0, Math.PI * 2);
-      bufCtx.fill();
-    }
+    drawRealtimeDots(bufCtx, points, drawnCountRef.current);
     drawnCountRef.current = points.length;
 
-    // Draw the main canvas
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-
-    // Background
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-
-    // Plot area background
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(PADDING, PADDING, PLOT_SIZE, PLOT_SIZE);
-
-    // Grid lines
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i <= 4; i++) {
-      const pos = PADDING + (i / 4) * PLOT_SIZE;
-      ctx.beginPath();
-      ctx.moveTo(pos, PADDING);
-      ctx.lineTo(pos, PADDING + PLOT_SIZE);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(PADDING, pos);
-      ctx.lineTo(PADDING + PLOT_SIZE, pos);
-      ctx.stroke();
-    }
-
-    // Axis labels
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
-    ctx.font = '11px system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    for (let i = 0; i <= 4; i++) {
-      const val = (i / 4).toFixed(2);
-      const pos = PADDING + (i / 4) * PLOT_SIZE;
-      ctx.fillText(val, pos, CANVAS_SIZE - 14);
-      ctx.save();
-      ctx.textAlign = 'right';
-      ctx.fillText((1 - i / 4).toFixed(2), PADDING - 8, pos + 4);
-      ctx.restore();
-    }
-
-    // Quarter circle arc
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(PADDING, PADDING + PLOT_SIZE, PLOT_SIZE, -Math.PI / 2, 0);
-    ctx.stroke();
+    drawStaticElements(ctx);
 
     // Composite buffered dots
     ctx.drawImage(buffer, 0, 0);
@@ -107,7 +132,7 @@ export default function SimulationCanvas({ points, insideCount, isComputing }) {
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
     ctx.lineWidth = 1;
     ctx.strokeRect(PADDING, PADDING, PLOT_SIZE, PLOT_SIZE);
-  }, [points, insideCount]);
+  }, [points, insideCount, pixelBuffer]);
 
   return (
     <div className="relative rounded-2xl bg-white p-5 shadow-[0_1px_8px_rgba(0,0,0,0.08)]">
