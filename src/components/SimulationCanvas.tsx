@@ -1,10 +1,11 @@
 import { useRef, useEffect } from 'react';
+import type { Point } from '../types';
 
 const CANVAS_SIZE = 500;
 const PADDING = 40;
 const PLOT_SIZE = CANVAS_SIZE - PADDING * 2;
 
-function drawRealtimeDots(bufCtx, points, startIdx) {
+function drawRealtimeDots(bufCtx: CanvasRenderingContext2D, points: Point[], startIdx: number) {
   if (startIdx >= points.length) return;
 
   for (let i = startIdx; i < points.length; i++) {
@@ -19,7 +20,7 @@ function drawRealtimeDots(bufCtx, points, startIdx) {
   }
 }
 
-function drawStaticElements(ctx) {
+function drawStaticElements(ctx: CanvasRenderingContext2D) {
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
   // Background
@@ -63,9 +64,17 @@ function drawStaticElements(ctx) {
   ctx.stroke();
 }
 
-export default function SimulationCanvas({ points, insideCount, pixelBuffer, isComputing, progress }) {
-  const canvasRef = useRef(null);
-  const bufferRef = useRef(null);
+interface SimulationCanvasProps {
+  points: Point[];
+  insideCount: number;
+  pixelBuffer: Uint8ClampedArray | null;
+  isComputing: boolean;
+  progress: number;
+}
+
+export default function SimulationCanvas({ points, insideCount, pixelBuffer, isComputing, progress }: SimulationCanvasProps) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const bufferRef = useRef<HTMLCanvasElement | null>(null);
   const drawnCountRef = useRef(0);
 
   // Initialize offscreen buffer
@@ -83,14 +92,14 @@ export default function SimulationCanvas({ points, insideCount, pixelBuffer, isC
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     drawStaticElements(ctx);
 
     // Draw the pre-rendered pixel buffer via a temp canvas
     const tmp = document.createElement('canvas');
     tmp.width = CANVAS_SIZE;
     tmp.height = CANVAS_SIZE;
-    const tmpCtx = tmp.getContext('2d');
+    const tmpCtx = tmp.getContext('2d')!;
     const imageData = new ImageData(new Uint8ClampedArray(pixelBuffer), CANVAS_SIZE, CANVAS_SIZE);
     tmpCtx.putImageData(imageData, 0, 0);
     ctx.drawImage(tmp, 0, 0);
@@ -108,7 +117,7 @@ export default function SimulationCanvas({ points, insideCount, pixelBuffer, isC
     const buffer = bufferRef.current;
     if (!canvas || !buffer) return;
 
-    const bufCtx = buffer.getContext('2d');
+    const bufCtx = buffer.getContext('2d')!;
 
     // Detect reset: if points decreased, clear the buffer
     if (points.length < drawnCountRef.current) {
@@ -119,7 +128,7 @@ export default function SimulationCanvas({ points, insideCount, pixelBuffer, isC
     drawRealtimeDots(bufCtx, points, drawnCountRef.current);
     drawnCountRef.current = points.length;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     drawStaticElements(ctx);
 
     // Composite buffered dots

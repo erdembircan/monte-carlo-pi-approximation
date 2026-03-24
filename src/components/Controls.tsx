@@ -1,3 +1,17 @@
+import type { Mode, Speed } from '../types';
+
+interface ControlsProps {
+  mode: Mode;
+  setMode: (mode: Mode) => void;
+  speed: Speed;
+  setSpeed: (speed: Speed) => void;
+  sampleSize: number;
+  setSampleSize: (n: number) => void;
+  isRunning: boolean;
+  onStart: () => void;
+  onReset: () => void;
+}
+
 export default function Controls({
   mode,
   setMode,
@@ -8,7 +22,7 @@ export default function Controls({
   isRunning,
   onStart,
   onReset,
-}) {
+}: ControlsProps) {
   return (
     <div className="flex flex-wrap items-center justify-center gap-4">
       {/* Mode toggle */}

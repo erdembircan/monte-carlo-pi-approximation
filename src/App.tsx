@@ -4,15 +4,16 @@ import Controls from './components/Controls';
 import FormulaDisplay from './components/FormulaDisplay';
 import Stats from './components/Stats';
 import InfoPanel from './components/InfoPanel';
+import type { Point, Mode, Speed, WorkerMessage } from './types';
 
 export default function App() {
-  const [mode, setMode] = useState('realtime');
-  const [speed, setSpeed] = useState('normal');
+  const [mode, setMode] = useState<Mode>('realtime');
+  const [speed, setSpeed] = useState<Speed>('normal');
   const [sampleSize, setSampleSize] = useState(10000);
-  const [points, setPoints] = useState([]);
+  const [points, setPoints] = useState<Point[]>([]);
   const [insideCount, setInsideCount] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const [pixelBuffer, setPixelBuffer] = useState(null);
+  const [pixelBuffer, setPixelBuffer] = useState<Uint8ClampedArray | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isComputing, setIsComputing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -20,9 +21,9 @@ export default function App() {
     return !document.cookie.includes('info_seen=1');
   });
 
-  const rafRef = useRef(null);
-  const workerRef = useRef(null);
-  const pointsRef = useRef([]);
+  const rafRef = useRef<number | null>(null);
+  const workerRef = useRef<Worker | null>(null);
+  const pointsRef = useRef<Point[]>([]);
   const insideRef = useRef(0);
 
   const handleReset = useCallback(() => {
@@ -49,7 +50,7 @@ export default function App() {
     const batchSize = speed === 'fast' ? 100 : 10;
 
     // Generate first batch synchronously for instant visual feedback
-    const firstPoints = [];
+    const firstPoints: Point[] = [];
     let firstInside = 0;
     for (let i = 0; i < batchSize; i++) {
       const x = Math.random();
@@ -76,7 +77,7 @@ export default function App() {
 
       const remaining = sampleSize - currentLen;
       const count = Math.min(batchSize, remaining);
-      const newPoints = [];
+      const newPoints: Point[] = [];
       let newInside = 0;
 
       for (let i = 0; i < count; i++) {
@@ -105,12 +106,12 @@ export default function App() {
     setIsComputing(true);
 
     const worker = new Worker(
-      new URL('./workers/simulation.worker.js', import.meta.url),
+      new URL('./workers/simulation.worker.ts', import.meta.url),
       { type: 'module' }
     );
     workerRef.current = worker;
 
-    worker.onmessage = (e) => {
+    worker.onmessage = (e: MessageEvent<WorkerMessage>) => {
       const { type } = e.data;
       if (type === 'progress') {
         setProgress(e.data.progress);

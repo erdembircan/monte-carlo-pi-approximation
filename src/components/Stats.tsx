@@ -1,4 +1,9 @@
-export default function Stats({ insideCount, outsideCount }) {
+interface StatsProps {
+  insideCount: number;
+  outsideCount: number;
+}
+
+export default function Stats({ insideCount, outsideCount }: StatsProps) {
   const total = insideCount + outsideCount;
 
   return (

@@ -5,7 +5,7 @@ const PLOT_SIZE = CANVAS_SIZE - PADDING * 2;
 const INSIDE_R = 2, INSIDE_G = 132, INSIDE_B = 199;
 const OUTSIDE_R = 219, OUTSIDE_G = 39, OUTSIDE_B = 119;
 
-self.onmessage = function (e) {
+self.onmessage = function (e: MessageEvent<{ sampleSize: number }>) {
   const { sampleSize } = e.data;
 
   const pixels = new Uint8ClampedArray(CANVAS_SIZE * CANVAS_SIZE * 4);
@@ -46,6 +46,6 @@ self.onmessage = function (e) {
 
   self.postMessage(
     { type: 'done', pixels, insideCount, totalCount: sampleSize },
-    [pixels.buffer]
+    { transfer: [pixels.buffer] }
   );
 };

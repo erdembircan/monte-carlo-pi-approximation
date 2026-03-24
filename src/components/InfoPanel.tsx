@@ -1,4 +1,9 @@
-export default function InfoPanel({ isOpen, onClose }) {
+interface InfoPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function InfoPanel({ isOpen, onClose }: InfoPanelProps) {
   return (
     <>
       {/* Backdrop */}

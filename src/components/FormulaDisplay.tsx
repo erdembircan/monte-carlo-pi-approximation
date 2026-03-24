@@ -1,6 +1,11 @@
 const PI_STR = Math.PI.toFixed(6);
 
-export default function FormulaDisplay({ insideCount, totalCount }) {
+interface FormulaDisplayProps {
+  insideCount: number;
+  totalCount: number;
+}
+
+export default function FormulaDisplay({ insideCount, totalCount }: FormulaDisplayProps) {
   const piApprox = totalCount > 0 ? (4 * insideCount) / totalCount : 0;
   const approxStr = piApprox.toFixed(6);
 
