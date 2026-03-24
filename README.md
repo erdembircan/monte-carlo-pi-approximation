@@ -1,5 +1,7 @@
 # Monte Carlo Pi Approximation
 
+![Build and Commit](https://github.com/erdembircan/monte-carlo-pi-approximation/actions/workflows/build.yml/badge.svg)
+
 [Live Demo](https://erdembircan.github.io/monte-carlo-pi-approximation/)
 
 An interactive visualization of the Monte Carlo method for estimating the value of π.
